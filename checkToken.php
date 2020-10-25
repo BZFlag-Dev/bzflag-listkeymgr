@@ -1,7 +1,7 @@
 <?php
 
 // This function will check a username and token returned by the bzflag
-// weblogin page at http://my.bzflag.org/weblogin.php?action=weblogin. You can use
+// weblogin page at https://my.bzflag.org/weblogin.php?action=weblogin. You can use
 // this URL to ask a user for his bzflag global login. Your page needs to pass
 // in an URL paramater to the weblogin that contains your URL to be called with
 // the username and token. This allows your site to use the same usernames and
@@ -10,7 +10,7 @@
 // %USERNAME% that will be replaced with the real username and token when the
 // URL is called. For example:
 //
-// http://my.bzflag.org/weblogin.php?action=weblogin&url=http://www.mysite.com/mydir/login.php?token=%TOKEN%&username=%USERNAME%
+// https://my.bzflag.org/weblogin.php?action=weblogin&url=https://www.mysite.com/mydir/login.php?token=%TOKEN%&username=%USERNAME%
 //
 // NOTE: The URL passed MUST be URL encoded.  The example above shows the URL
 // in plain text to make it clearer what is happening.
@@ -21,6 +21,10 @@
 // This function should be used after you get the info from the login callback,
 // to verify that it is a valid token, and to test which groups the user is a
 // member of.
+//
+// Sites MUST redirect the user to the login form. Sites that send the login
+// info from any other form will automaticly be rejected. The aim of this
+// service to to show the user that login info is being sent to bzflag.org.
 //
 // TODO: Add some error handling/reporting
 
@@ -33,7 +37,7 @@ function validate_token($token, $username, $groups = array(), $checkIP = true)
     $listserver = Array();
 
     // First off, start with the base URL
-    $listserver['url'] = 'http://my.bzflag.org/db/';
+    $listserver['url'] = 'https://my.bzflag.org/db/';
     // Add on the action and the username
     $listserver['url'] .= '?action=CHECKTOKENS&checktokens='.urlencode($username);
     // Make sure we match the IP address of the user
