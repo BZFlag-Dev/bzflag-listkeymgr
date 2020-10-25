@@ -24,7 +24,7 @@
 		
 		echo 
 			"</head>
-			<body background=0xffffff leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\">
+			<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\">
 			<div id=\"PageFrame\">
 			
 			<!-- begin header -->
@@ -57,7 +57,7 @@
 		
 		echo 
 			"</head>
-			<body background=0xffffff leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\">
+			<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\">
 			<div id=\"Redirect\">
 			You are being directed to <a href=\"".$url."\"> ". $url . " </a>
 			</div>
