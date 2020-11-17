@@ -1,134 +1,92 @@
-<?php  
-	// define dbhost/dbuname/dbpass/dbname here
-// NOTE it's .php so folks can't read the source
-include('/etc/bzflag/serversettings.php');
-// $dbhost  = 'localhost';
-// $dbname  = 'bzflag';
-// $bbdbname = 'bzbb';
-// $dbuname = 'bzflag';
-// $dbpass  = 'bzflag';
+<?php
+/* bzflag-listkeymgr
+ * Copyright (c) 1993-2020 Tim Riker
+ *
+ * This package is free software;  you can redistribute it and/or
+ * modify it under the terms of the LGPL 2.1 license found in the file
+ * named COPYING.txt that should have accompanied this file.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 
-	
-	function Sanitize ( $value )
-	{
-		return mysql_real_escape_string(addslashes($value));	
-	}
-	
-	function Unsanitize ( $value )
-	{
-		return stripslashes($value);	
-	}
-	
-	function ConnectToDB ()
-	{
-		global $dbhost;
-		global $dbname;
-		global $dbuname;
-		global $dbpass;
-		
-		$db = mysql_pconnect($dbhost,$dbuname,$dbpass);
-		if (!$db)
-		{
-			return FALSE;
-		}
-		else
-			$result = mysql_select_db($dbname);
-		
-		return $db;
-	}
-	
-	function SQLError ( $query )
-	{
-		echo "SQL ERROR: " . mysql_error() . "<br>";
-		echo "SQL ERROR Query: " . $query . "<br>";
-		return FALSE;
-	}
-	
-	function SQLGet ( $query )
-	{
-		$result = mysql_query($query);
-		if (!$result && $result != 0 && mysql_num_rows($result) > 0)
-			return SQLError($query);
-			
-		return $result;
-	}
-	
-	function SQLSet ( $query )
-	{
-		$result = mysql_query($query);
-		if (!$result)
-			return SQLError($query);
-			
-		return TRUE;
-	}
-	
-	function GetQueryResults ( $result, $field )
-	{
-		if (!$result)
-			return FALSE;
-			
-		$list = array(); 
-		$count = mysql_num_rows($result);
-		for ($i = 0; $i < $count; $i += 1)
-		{
-			$row = mysql_fetch_array($result);
-			$list[] = Unsanitize($row[$field]);
-		}
-		
-		return $list;
-	}
-	
-	function GetQueryResultsArray ( $result  )
-	{
-		if (!$result)
-			return FALSE;
-			
-		$list = array(); 
-		$count = mysql_num_rows($result);
-		for ($i = 0; $i < $count; $i += 1)
-		{
-			$row = mysql_fetch_array($result);
-			$rowList = array();
-			foreach ($row as $key => $value)
-			{
-				$rowList[$key] = Unsanitize($value);
-			}
-			$list[] = $rowList;
-		}
-		
-		return $list;
-	}
-	
-	function GetDBFieldForKey ( $keyName, $key, $db, $field )
-	{
-		$query = "SELECT " . $field . " FROM ". $db ." WHERE " . $keyName . "='" .$key . "'";		
-		$results = GetQueryResults(SQLGet($query),$field );
-		
-		if (!$results)
-			return FALSE;
-		return Unsanitize($results[0]);
-	}
-	
-	function GetDBFieldForID ( $id, $db, $field )
-	{
-		$query = "SELECT " . $field . " FROM ". $db ." WHERE ID=" . $id;		
-		$results = GetQueryResults(SQLGet($query),$field );
-		
-		if (!$results)
-			return FALSE;
-		return Unsanitize($results[0]);
-	}
-	
-	function SetDBFieldForKey ( $keyName, $key, $db, $field, $value )
-	{
-		$query = "UPDATE " . $db ." SET " . $field . "='" .$value."' WHERE " . $keyName ."='" .$key. "'";
-		return SQLSet($query); 
-	}
-	
-	function SetDBFieldForID ( $id, $db, $field, $value )
-	{
-		return SetDBFieldForKey("ID", $id, $db, $field, $value);
-	}
+class DB
+{
+  var $link;
 
-	
-?>
+  function __construct($hostname, $database, $username, $password)
+  {
+    $this->link = new mysqli($hostname, $username, $password, $database);
+    if ($this->link->connect_error) {
+      die('Unable to connect to database');
+    }
+
+    $this->link->query("SET NAMES 'utf8'");
+  }
+
+  function getAffectedRows() { return $this->link->affected_rows; }
+
+  private function getAllAssoc($result) {
+    $rows = Array();
+    while ($row = $result->fetch_assoc()) {
+      $rows[] = $row;
+    }
+    return $rows;
+  }
+
+  function createKey($key, $hostname, $bzid)
+  {
+    $statement = $this->link->prepare("INSERT INTO authkeys (key_string, owner, host, edit_date) VALUES (?, ?, ?, NOW())");
+    if ($statement) {
+      $statement->bind_param('sss', $key, $bzid, $hostname);
+      $statement->execute();
+    }
+  }
+
+  function getKeyByKey($key)
+  {
+    $statement = $this->link->prepare("SELECT host, owner FROM authkeys WHERE key_string = ?");
+    if ($statement) {
+      $statement->bind_param('s', $key);
+      $statement->execute();
+      $result = $statement->get_result();
+      if ($result) {
+        $row = $result->fetch_assoc();
+        $statement->free_result();
+        if ($row) return $row;
+      }
+    }
+
+    return false;
+  }
+
+  function getKeysByBZID($bzid)
+  {
+    $statement = $this->link->prepare("SELECT id, key_string, host FROM authkeys WHERE owner = ?");
+    if ($statement) {
+      $statement->bind_param('s', $bzid);
+      $statement->execute();
+      $result = $statement->get_result();
+      if ($result) {
+        return $this->getAllAssoc($result);
+      }
+    }
+  }
+
+  function deleteKey($keyid, $bzid)
+  {
+    $statement = $this->link->prepare("DELETE FROM authkeys WHERE ID = ? AND owner = ? LIMIT 1");
+    if ($statement) {
+      $statement->bind_param('is', $keyid, $bzid);
+      if ($statement->execute()) {
+          $statement->store_result();
+          return ($this->link->affected_rows === 1);
+      }
+    }
+
+    return false;
+  }
+
+}
+

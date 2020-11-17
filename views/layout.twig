@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BZFlag Server Key Management</title>
+  <link href="css.css" rel="stylesheet" />
+</head>
+<body>
+<div id="header">
+  <h1>BZFlag Server Key Management</h1>
+  Server keys are used for hosting public BZFlag server instances<br />
+  {% if user %}<a href="?action=logout">Logout</a>{% endif %}
+</div>
+
+{% block body %}{% endblock %}
+</body>
+</html>

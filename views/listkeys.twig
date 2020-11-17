@@ -1,0 +1,53 @@
+{% extends "layout.twig" %}
+
+{% block body %}
+  {% if flash %}
+  <div id="flash">{{ flash }}</div>
+  {% endif %}
+
+  <h2>New Key</h2>
+  <div class="section">
+    To generate a key, enter the hostname that will point to your server. If you do not have a hostname, you may buy a
+    domain from any registrar, or use a free service such as <a href="https://freedns.afraid.org">FreeDNS</a> or
+    <a href="https://www.noip.com/">NoIP</a>. The generated key will only work for servers running under the specified
+    hostname.
+
+    <form method="post">
+      <input type="hidden" name="action" value="createkey" />
+      Server Hostname: <input type="text" name="hostname" />
+      <button>Create Key</button>
+    </form>
+  </div>
+
+  <h2>Keys</h2>
+  <div class="section">
+    {% for key in keys %}
+      {% if loop.first %}
+      <div id="KeyList">
+        <table border="0" id="KeyListTable">
+          <tr>
+            <th>Host</th>
+            <th>Key</th>
+            <th>Actions</th>
+          </tr>
+      {% endif %}
+          <tr class="KeyItem">
+            <td>{{ key.host }}</td>
+            <td>{{ key.key_string }}</td>
+            <td>
+              <form method="post">
+                <input type="hidden" name="action" value="deletekey" />
+                <input type="hidden" name="id" value="{{ key.id }}" />
+                <button>Delete</button>
+              </form>
+            </td>
+          </tr>
+      {% if loop.last %}
+        </table>
+      </div>
+      {% endif %}
+    {% else %}
+      <div>No keys are associated with your account</div>
+    {% endfor %}
+  </div>
+{% endblock %}
