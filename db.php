@@ -1,6 +1,6 @@
 <?php
 /* bzflag-listkeymgr
- * Copyright (c) 1993-2020 Tim Riker
+ * Copyright (c) 1993-2023 Tim Riker
  *
  * This package is free software;  you can redistribute it and/or
  * modify it under the terms of the LGPL 2.1 license found in the file
