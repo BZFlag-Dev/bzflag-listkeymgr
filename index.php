@@ -53,7 +53,7 @@ $config = require("config.php");
         }
         // If no user is logged in, redirect to weblogin
         else if (!isset($_SESSION['bzid']) || $_SESSION['bzid'] == -1 ) {
-            $this->redirect("https://my.bzflag.org/weblogin.php?url=" . urlencode($this->config['protocol']."://" . $this->config['hostname'] . $this->config['baseURI'] . "?action=login&token=%TOKEN%&user=%USERNAME%"));
+            $this->redirect('https://' . $this->config['hostname'] . '/weblogin.php?url=' . urlencode($this->config['protocol']."://" . $this->config['hostname'] . $this->config['baseURI'] . "?action=login&token=%TOKEN%&user=%USERNAME%"));
         }
         else {
             if (isset($_POST['action'])) {

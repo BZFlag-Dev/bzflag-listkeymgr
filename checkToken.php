@@ -37,7 +37,7 @@ function validate_token($token, $username, $groups = array(), $checkIP = true)
     $listserver = Array();
 
     // First off, start with the base URL
-    $listserver['url'] = 'https://my.bzflag.org/db/';
+    $listserver['url'] = 'https://' . $config['hostname'] . '/db/';
     // Add on the action and the username
     $listserver['url'] .= '?action=CHECKTOKENS&checktokens='.urlencode($username);
     // Make sure we match the IP address of the user
