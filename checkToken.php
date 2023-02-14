@@ -30,6 +30,7 @@
 
 function validate_token($token, $username, $groups = array(), $checkIP = true)
 {
+  global $config;
   // We should probably do a little more error checking here and
   // provide an error return code (define constants?)
   if (isset($token, $username) && strlen($token) > 0 && strlen($username) > 0)
