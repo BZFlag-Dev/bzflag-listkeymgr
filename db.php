@@ -57,7 +57,22 @@ class DB
         if ($row) return $row;
       }
     }
+    return false;
+  }
 
+  function getHostByHost($host)
+  {
+    $statement = $this->link->prepare("SELECT host, owner FROM authkeys WHERE host = ?");
+    if ($statement) {
+      $statement->bind_param('s', $host);
+      $statement->execute();
+      $result = $statement->get_result();
+      if ($result) {
+        $row = $result->fetch_assoc();
+        $statement->free_result();
+        if ($row) return $row;
+      }
+    }
     return false;
   }
 
@@ -84,9 +99,7 @@ class DB
           return ($this->link->affected_rows === 1);
       }
     }
-
     return false;
   }
-
 }
 

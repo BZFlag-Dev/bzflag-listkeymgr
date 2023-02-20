@@ -19,21 +19,21 @@ $config = require("config.php");
 
 (new class($config)
 {
-	private $db;
-	private $twig;
-	private $config;
+    private $db;
+    private $twig;
+    private $config;
 
-	public function __construct($config)
-	{
-	    $this->config = $config;
-		session_start();
-		$loader = new \Twig\Loader\FilesystemLoader(__DIR__.'/views/');
-		$this->twig = new \Twig\Environment($loader);
-        require('/etc/bzflag/serversettings.php');
-		$this->db = new DB($dbhost, $dbname, $dbuname, $dbpass);
-	}
+    public function __construct($config)
+    {
+        $this->config = $config;
+        session_start();
+        $loader = new \Twig\Loader\FilesystemLoader(__DIR__.'/views/');
+        $this->twig = new \Twig\Environment($loader);
+    require('/etc/bzflag/serversettings.php');
+        $this->db = new DB($dbhost, $dbname, $dbuname, $dbpass);
+    }
 
-	private function error($message)
+    private function error($message)
     {
         echo $this->twig->render('error.twig', [
             'error' => $message
@@ -45,7 +45,7 @@ $config = require("config.php");
         header("Location: $url");
     }
 
-	public function run()
+    public function run()
     {
         // Allow the login action to proceed without any other requirements
         if (isset($_GET['action']) && $_GET['action'] == 'login') {
@@ -102,6 +102,12 @@ $config = require("config.php");
     {
         if (strlen($_POST['hostname']) == 0) {
             $_SESSION['flash'] = 'A hostname must be provided when creating a key.';
+            $this->redirect($this->config['baseURI']);
+            return;
+        }
+
+        if ($this->db->getHostByHost($_REQUEST['hostname']) !== false) {
+            $_SESSION['flash'] = 'Error: Hostname ' . $_REQUEST['hostname'] . ' is already in use';
             $this->redirect($this->config['baseURI']);
             return;
         }
